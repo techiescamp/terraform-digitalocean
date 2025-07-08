@@ -1,0 +1,26 @@
+
+do_token             = "<your-token>"
+
+ssh_key_name         = "<your-ssh-key>"
+ssh_private_key_path = "<your-SSH-private-key-path>"
+region               = "blr1"
+vpc_cidr             = "192.168.0.0/16"
+vpc_name             = "k8s-vpc"
+
+worker_count         = 2
+control_plane_size   = "s-2vcpu-4gb"
+worker_size          = "s-2vcpu-2gb"
+image                = "ubuntu-24-04-x64"
+
+droplet_name_control_plane = "k8s-control-plane"
+droplet_name_worker        = "k8s-worker"
+control_plane_hostname     = "control-plane"
+
+common_tags          = ["k8s", "production"]
+control_plane_tags   = ["k8s", "control-plane"]
+worker_tags          = ["k8s", "worker"]
+
+
+allowed_cidrs        = ["0.0.0.0/0", "::/0"]
+tcp_ports            = "1-65535"
+udp_ports            = "1-65535"
