@@ -1,19 +1,9 @@
-terraform {
-  required_version = ">= 1.0"
-  required_providers {
-    digitalocean = {
-      source  = "digitalocean/digitalocean"
-      version = "~> 2.0"
-    }
-  }
-}
 
-provider "digitalocean" {
-  token = var.do_token
-}
+
+
 
 module "networking" {
-  source = "./modules/networking"
+  source = "../../modules/networking"
 
   ssh_key_name = var.ssh_key_name
   vpc_name     = var.vpc_name
@@ -22,7 +12,7 @@ module "networking" {
 }
 
 module "control_plane" {
-  source = "./modules/control-plane"
+  source = "../../modules/control-plane"
 
   image                      = var.image
   droplet_name_control_plane = var.droplet_name_control_plane
@@ -37,7 +27,7 @@ module "control_plane" {
 }
 
 module "workers" {
-  source = "./modules/workers"
+  source = "../../modules/workers"
 
   worker_count         = var.worker_count
   image                = var.image
@@ -51,7 +41,7 @@ module "workers" {
 }
 
 module "firewall" {
-  source = "./modules/firewall"
+  source = "../../modules/firewall"
 
   control_plane_id = module.control_plane.control_plane_id
   worker_ids       = module.workers.worker_ids
@@ -61,7 +51,7 @@ module "firewall" {
 }
 
 module "k8s_setup" {
-  source = "./modules/k8s-setup"
+  source = "../../modules/k8s-setup"
 
   ssh_private_key_path    = var.ssh_private_key_path
   reserved_ip             = module.networking.reserved_ip

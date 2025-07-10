@@ -1,6 +1,6 @@
 # Kubernetes Lab Setup on DigitalOcean with Terraform
 
-The provides a **modular Terraform configuration** to deploy a Kubernetes cluster on [DigitalOcean](https://www.digitalocean.com) for **learning and lab purposes**. The infrastructure is organized into reusable modules to enable easy experimentation and educational use.
+This repository contains Terraform infrastructure as code (IaC) to deploy a Kubernetes learning lab on DigitalOcean using kubeadm, with CRI-O as the container runtime and Calico for networking. Perfect for hands-on learning, experimentation, and practicing Kubernetes concepts.
 
 ---
 
@@ -8,46 +8,40 @@ The provides a **modular Terraform configuration** to deploy a Kubernetes cluste
 
 The lab setup provisions:
 
-- **Control Plane**: Single master node with a reserved IP address  
-- **Worker Nodes**: 2 configurable worker nodes (adjustable)  
-- **Networking**: VPC with private networking  
-- **Security**: Basic firewall rules (permissive for lab use)   
+- **Control Plane**: Single control plane node with reserved IP (2 vCPU, 4GB RAM)
+- **Worker Nodes**: 2 worker nodes by default (2 vCPU, 2GB RAM each)
+- **Container Runtime**: CRI-O v1.33
+- **Kubernetes Version**: v1.33.0
+- **Network Plugin**: Calico v3.29.1
+- **VPC**: Private networking with custom CIDR
+- **Firewall**: Open firewall rules for lab experimentation (NOT for production) 
+- **Spaces Object Storage** This for Terraform state file storage
 
----
-
-## Project Structure
-
-```bash
-.
-├── main.tf                 # Root configuration
-├── variables.tf            # Input variables
-├── outputs.tf              # Output values
-├── terraform.tfvars        # Variable values
-├── README.md               # This file
-├── scripts/                # Initialization scripts
-│   ├── control-plane-init.sh
-│   ├── worker-init.sh
-│   └── install-calico.sh
-└── modules/                # Terraform modules
-    ├── networking/         # VPC, SSH keys, reserved IP
-    ├── control-plane/      # Master node configuration
-    ├── workers/            # Worker nodes configuration
-    ├── firewall/           # Security rules
-    └── k8s-setup/          # Kubernetes initialization
-```
 ## Prerequisites 
 
-**1. Tools Required**
+### **1. Tools Required**
 - Terraform
 - DigitalOcean CLI (doctl)
+- SSH Key For accessing lab node
 - Basic understanding of Kubernetes concepts and DigitalOcean
 
-**2. DigitalOcean Setup**
+### **2. DigitalOcean Setup**
 
 - Create a DigitalOcean account (if you don’t already have one)
-- Generate a Personal Access Token
+- Open the DigitalOcean Console → Navigate API → Personal Access Tokens → Generate a new token with all permission
+- copy the token 
+### configuration doctl (DigitalOcean CLI)
+```bash
+doctl auth init
+
+Please enter your access token: <Paste your token here>
+
+# Verify Authentication
+doctl account get
+
+```
   
-Add your SSH key to DigitalOcean:
+### Add your SSH key to DigitalOcean:
 ```bash
 doctl compute ssh-key create "<key_name>" --public-key "$(cat ~/.ssh/id_rsa.pub)"
 # verify the ssh key
@@ -58,13 +52,21 @@ doctl compute ssh-key list
 ```bash
 ssh-keygen -t rsa -b 4096 
 ```
+### Setup Environment Variables
+Open the DigitalOcean Console → Navigate to Spaces (Object Storage) → Create an Access Key with Full Access → Click 'Create'.
+copy access key  and secret key 
+```bash
+export AWS_ACCESS_KEY_ID="<your-spaces_access_key_id>"
+export AWS_SECRET_ACCESS_KEY="<your-spaces_secret_access_key>"
+```
+
 ## Start with Lab Setup
 **1. Clone and Configure**
 ```bash
 git clone https://github.com/techiescamp/terraform-digitalocean.git
 cd terraform-digitalocean
 ```
-**2. Update `terraform.tfvars` with your values**
+**2. Update `vars/dev/backend.tfvars` `vars/dev/k8s-cluster.tfvars` `infra/k8s-cluster/backend.tf` with your values**
 ```bash
 do_token             = "<your-token>" 
 ssh_key_name         = "<your-ssh-key-name>"
@@ -72,24 +74,46 @@ ssh_private_key_path = "<your-SSH-private-key-local-path>"
 region               = "blr1"              # Bangalore region
 worker_count         = 2                   # Number of worker nodes
 ```
-**3. Initialize and Deploy**
+**3. Initialize and Deploy backend(Spaces Object Storage)**
 ```bash
+cd  infra/backend/
+
 # Initialize Terraform
 terraform init
 
 # Preview the infrastructure plan
-terraform plan
+terraform plan -var-file="../../vars/dev/backend.tfvars"
 
-# Deploy the lab environment (10 minutes)
-terraform apply --auto-approve
+# Deploy the Spaces Object Storage 
+terraform apply --auto-approve -var-file="../../vars/dev/backend.tfvars"
 ```
+
+**4. Initialize and Deploy k8s cluster lab setup**
+```bash
+cd  ../k8s-cluster/  #OR  cd infra/k8s-cluster/
+
+# Initialize Terraform
+terraform init
+
+# Preview the infrastructure plan
+terraform plan -var-file="../../vars/dev/k8s-cluster.tfvars"
+
+# Deploy the Spaces Object Storage 
+terraform apply --auto-approve -var-file="../../vars/dev/k8s-cluster.tfvars"
+```
+
+
 ## Security Notice (Lab Configuration)
 **⚠️ Lab Security Warning**: This configuration uses permissive security settings for ease of learning. Do not use these settings in production!
 
 ## Cleanup
 To destroy the lab setup and avoid ongoing costs:
 ```bash
-terraform destroy --auto-approve
+terraform destroy --auto-approve -var-file="../../vars/dev/k8s-cluster.tfvars"
+terraform destroy --auto-approve -var-file="../../vars/dev/backend.tfvars"
+#delete SSH key 
+doctl compute ssh-key delete <id>
+
 ```
 ## Cost Management
 - Destroy the lab after each session

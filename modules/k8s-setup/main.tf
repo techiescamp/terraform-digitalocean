@@ -41,7 +41,7 @@ resource "null_resource" "wait_for_k8s_ready" {
   }
   
   provisioner "file" {
-    source      = "scripts/install-calico.sh"
+    source      = "${path.root}/../../scripts/install-calico.sh"
     destination = "/root/install-calico.sh"
   }
 

@@ -16,7 +16,7 @@ resource "digitalocean_droplet" "k8s_workers" {
   ssh_keys = [var.ssh_key_id]
   vpc_uuid = var.vpc_id
 
-  user_data = templatefile("${path.root}/scripts/worker-init.sh", {
+  user_data = templatefile("${path.root}/../../scripts/worker-init.sh", {
     hostname = format("node%02d", count.index + 1)
   })
 

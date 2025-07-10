@@ -15,7 +15,7 @@ resource "digitalocean_droplet" "k8s_control_plane" {
   ssh_keys = [var.ssh_key_id]
   vpc_uuid = var.vpc_id
 
-  user_data = templatefile("${path.root}/scripts/control-plane-init.sh", {
+  user_data = templatefile("${path.root}/../../scripts/control-plane-init.sh", {
     hostname    = var.control_plane_hostname
     reserved_ip = var.reserved_ip
   })
