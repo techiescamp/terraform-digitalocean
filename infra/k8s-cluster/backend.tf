@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket                      = "my-terraform-state" # unique name for the space
+    bucket                      = "my-terraform-state" # same name of space 
     key                         = "terraform/k8s-cluster/terraform.tfstate"
     region                      = "us-east-1"
     endpoints = {

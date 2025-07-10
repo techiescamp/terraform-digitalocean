@@ -56,8 +56,8 @@ ssh-keygen -t rsa -b 4096
 Open the DigitalOcean Console → Navigate to Spaces (Object Storage) → Create an Access Key with Full Access → Click 'Create'.
 copy access key  and secret key 
 ```bash
-export AWS_ACCESS_KEY_ID="<your-spaces_access_key_id>"
-export AWS_SECRET_ACCESS_KEY="<your-spaces_secret_access_key>"
+export AWS_ACCESS_KEY_ID="<your-access-key>"
+export AWS_SECRET_ACCESS_KEY="<your-secret-access-ket>"
 ```
 
 ## Start with Lab Setup
@@ -73,6 +73,13 @@ ssh_key_name         = "<your-ssh-key-name>"
 ssh_private_key_path = "<your-SSH-private-key-local-path>"
 region               = "blr1"              # Bangalore region
 worker_count         = 2                   # Number of worker nodes
+
+spaces_access_key_id       = "<your-access-key-id>"
+spaces_secret_access_key   = "<your-secret-access-key>"
+space_name                  = "<file name of terraform-state>"
+
+bucket                      = "same of space_name"
+
 ```
 **3. Initialize and Deploy backend(Spaces Object Storage)**
 ```bash
@@ -109,9 +116,13 @@ terraform apply --auto-approve -var-file="../../vars/dev/k8s-cluster.tfvars"
 ## Cleanup
 To destroy the lab setup and avoid ongoing costs:
 ```bash
+
 terraform destroy --auto-approve -var-file="../../vars/dev/k8s-cluster.tfvars"
+
+cd ../backend
 terraform destroy --auto-approve -var-file="../../vars/dev/backend.tfvars"
-#delete SSH key 
+
+# Delete SSH key 
 doctl compute ssh-key delete <id>
 
 ```
