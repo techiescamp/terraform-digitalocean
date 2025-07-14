@@ -1,10 +1,10 @@
 terraform {
   backend "s3" {
-    bucket                      = "my-terraform-state" # same name of space 
+    bucket                      = "<your-terraform-state-space-name>" # give the same name of your space 
     key                         = "terraform/k8s-cluster/terraform.tfstate"
     region                      = "us-east-1"
     endpoints = {
-      s3 = "https://blr1.digitaloceanspaces.com"
+      s3 = "https://<your_bucket_region>.digitaloceanspaces.com"
     }
     skip_credentials_validation = true
     skip_metadata_api_check     = true

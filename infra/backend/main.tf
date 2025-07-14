@@ -8,7 +8,3 @@ resource "digitalocean_spaces_bucket" "terraform_state" {
   }
 }
 
-# Optional: Create a CDN endpoint for the Space
-#resource "digitalocean_cdn" "terraform_state_cdn" {
-#  origin = digitalocean_spaces_bucket.terraform_state.bucket_domain_name
-#}
