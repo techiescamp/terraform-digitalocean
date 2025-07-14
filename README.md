@@ -19,13 +19,13 @@ The lab setup provisions:
 
 ## Prerequisites 
 
-### **1. Tools Required**
 - Terraform
 - DigitalOcean CLI (doctl)
 - SSH Key For accessing lab node
+- PAT(Personal access tokens) &  Access Keys
 - Basic understanding of Kubernetes concepts and DigitalOcean
 
-### **2. DigitalOcean Setup**
+### **DigitalOcean Setup**
 
 - Create a DigitalOcean account (if you don’t already have one)
 - Open the DigitalOcean Console → Navigate API → Personal Access Tokens → Generate a new token with all permission
@@ -68,17 +68,30 @@ cd terraform-digitalocean
 ```
 **2. Update `vars/dev/backend.tfvars` `vars/dev/k8s-cluster.tfvars` `infra/k8s-cluster/backend.tf` with your values**
 ```bash
+# vars/dev/k8s-cluster.tfvars
+
 do_token             = "<your-token>" 
 ssh_key_name         = "<your-ssh-key-name>"
 ssh_private_key_path = "<your-SSH-private-key-local-path>"
 region               = "blr1"              # Bangalore region
 worker_count         = 2                   # Number of worker nodes
 
+
+# vars/dev/backend.tfvars
+
 spaces_access_key_id       = "<your-access-key-id>"
 spaces_secret_access_key   = "<your-secret-access-key>"
-space_name                  = "<file name of terraform-state>"
+space_name                 = "<file name of terraform-state>"
+do_token                   = "<your-token>"
+space_region                = "blr1" # Bangalore region
+region                      = "blr1" # Bangalore region
 
-bucket                      = "same of space_name"
+# infra/k8s-cluster/backend.tf
+
+bucket                      = "<your space_name>"
+endpoints = {
+      s3 = "https://<your_bucket_region>.digitaloceanspaces.com"
+
 
 ```
 **3. Initialize and Deploy backend(Spaces Object Storage)**
@@ -105,7 +118,7 @@ terraform init
 # Preview the infrastructure plan
 terraform plan -var-file="../../vars/dev/k8s-cluster.tfvars"
 
-# Deploy the Spaces Object Storage 
+# Deploy the k8s cluster
 terraform apply --auto-approve -var-file="../../vars/dev/k8s-cluster.tfvars"
 ```
 
